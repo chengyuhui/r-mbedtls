@@ -7,6 +7,7 @@ error_chain! {
         CipherInvalidArgs
         UnsupportedMode
         CipherInvalidData
+        CipherAllocFailed
         CipherError(code: c_int)
     }
 }

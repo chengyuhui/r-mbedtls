@@ -78,10 +78,11 @@ impl CipherContext {
             .and_then(|info| {
                 let ret = unsafe { mbedtls_sys::mbedtls_cipher_setup(ptr, info) };
 
-                match ret {
-                    0 => Ok(CipherContext { ctx: ptr }),
-                    _ => Err(ErrorKind::CipherSetupFailed.into()),
-                }
+                if ret == mbedtls_sys::MBEDTLS_ERR_CIPHER_ALLOC_FAILED {
+                    Err(ErrorKind::CipherAllocFailed.into())
+                } else {
+                    check_ret(ret)
+                }.map(|_| CipherContext { ctx: ptr })
             })
     }
 
