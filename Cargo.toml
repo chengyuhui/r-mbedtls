@@ -1,0 +1,8 @@
+[package]
+name = "r-mbedtls"
+version = "0.1.0"
+authors = ["chengyuhui <chengyuhui1@gmail.com>"]
+
+[dependencies]
+mbedtls-sys = { path = "mbedtls-sys", version = "0.1" }
+error-chain = "0.11.0"
