@@ -4,11 +4,9 @@ error_chain! {
     errors {
         CipherNotFound
         CipherSetupFailed
-        InvalidIv
-        InvalidKey
-        CipherKeyError(code: c_int)
+        CipherInvalidArgs
         UnsupportedMode
-        InvalidData
-        CipherUpdateError(code: c_int)
+        CipherInvalidData
+        CipherError(code: c_int)
     }
 }

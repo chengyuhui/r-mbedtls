@@ -50,6 +50,14 @@ pub fn block_size(t: CipherType) -> Result<usize> {
         .map(|info| info.block_size as usize)
 }
 
+fn check_ret(ret: c_int) -> Result<()> {
+    match ret {
+        0 => Ok(()),
+        mbedtls_sys::MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA => Err(ErrorKind::CipherInvalidArgs.into()),
+        x => Err(ErrorKind::CipherError(x).into()),
+    }
+}
+
 /// Represents a cipher context.
 pub struct CipherContext {
     ctx: *mut mbedtls_sys::mbedtls_cipher_context_t,
@@ -93,23 +101,15 @@ impl CipherContext {
     }
 
     pub fn set_iv(&mut self, iv: &[u8]) -> Result<()> {
-        let ret =
-            unsafe { mbedtls_sys::mbedtls_cipher_set_iv(self.ctx, iv.as_ptr(), iv.len()) as usize };
-        match ret {
-            0 => Ok(()),
-            _ => Err(ErrorKind::InvalidIv.into()),
-        }
+        let ret = unsafe { mbedtls_sys::mbedtls_cipher_set_iv(self.ctx, iv.as_ptr(), iv.len()) };
+        check_ret(ret)
     }
 
     pub fn set_key(&mut self, key: &[u8], mode: Mode) -> Result<()> {
         let len = key.len() as c_int * 8;
         let ret =
             unsafe { mbedtls_sys::mbedtls_cipher_setkey(self.ctx, key.as_ptr(), len, mode.into()) };
-        match ret {
-            0 => Ok(()),
-            mbedtls_sys::MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA => Err(ErrorKind::InvalidKey.into()),
-            x => Err(ErrorKind::CipherKeyError(x).into()),
-        }
+        check_ret(ret)
     }
 
     pub fn update(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize> {
@@ -131,12 +131,24 @@ impl CipherContext {
 
         match ret {
             0 => Ok(outl as usize),
-            mbedtls_sys::MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA => Err(ErrorKind::InvalidData.into()),
+            mbedtls_sys::MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA => {
+                Err(ErrorKind::CipherInvalidData.into())
+            }
             mbedtls_sys::MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE => {
                 Err(ErrorKind::UnsupportedMode.into())
             }
-            x => Err(ErrorKind::CipherUpdateError(x).into()),
+            x => Err(ErrorKind::CipherError(x).into()),
         }
+    }
+
+    pub fn update_ad(&mut self, ad: &[u8]) -> Result<()> {
+        let ret = { mbedtls_sys::mbedtls_cipher_update_ad(self.ctx, ad.as_ptr(), ad.len()) };
+        check_ret(ret)
+    }
+
+    pub fn write_tag(&mut self, tag: &mut [u8]) -> Result<()> {
+        let ret = { mbedtls_sys::mbedtls_cipher_write_tag(self.ctx, tag.as_mut_ptr(), tag.len()) };
+        check_ret(ret)
     }
 }
 
