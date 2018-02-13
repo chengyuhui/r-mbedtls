@@ -151,6 +151,11 @@ impl CipherContext {
         let ret = { mbedtls_sys::mbedtls_cipher_write_tag(self.ctx, tag.as_mut_ptr(), tag.len()) };
         check_ret(ret)
     }
+
+    pub fn reset(&mut self) -> Result<()> {
+        let ret = { mbedtls_sys::mbedtls_cipher_reset(self.ctx) };
+        check_ret(ret)
+    }
 }
 
 impl Drop for CipherContext {
