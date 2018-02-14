@@ -9,5 +9,8 @@ error_chain! {
         CipherInvalidData
         CipherAllocFailed
         CipherError(code: c_int)
+        CipherAuthFailed
+        CipherFullBlockExpected
+        CipherInvalidPadding
     }
 }
