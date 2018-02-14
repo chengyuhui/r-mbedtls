@@ -1,3 +1,4 @@
 [submodule "mbedtls-sys/mbedtls"]
 	path = mbedtls-sys/mbedtls
 	url = https://github.com/ARMmbed/mbedtls
+	branch = master
