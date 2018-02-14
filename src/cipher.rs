@@ -143,17 +143,17 @@ impl CipherContext {
     }
 
     pub fn update_ad(&mut self, ad: &[u8]) -> Result<()> {
-        let ret = { mbedtls_sys::mbedtls_cipher_update_ad(self.ctx, ad.as_ptr(), ad.len()) };
+        let ret = unsafe { mbedtls_sys::mbedtls_cipher_update_ad(self.ctx, ad.as_ptr(), ad.len()) };
         check_ret(ret)
     }
 
     pub fn write_tag(&mut self, tag: &mut [u8]) -> Result<()> {
-        let ret = { mbedtls_sys::mbedtls_cipher_write_tag(self.ctx, tag.as_mut_ptr(), tag.len()) };
+        let ret = unsafe { mbedtls_sys::mbedtls_cipher_write_tag(self.ctx, tag.as_mut_ptr(), tag.len()) };
         check_ret(ret)
     }
 
     pub fn reset(&mut self) -> Result<()> {
-        let ret = { mbedtls_sys::mbedtls_cipher_reset(self.ctx) };
+        let ret = unsafe { mbedtls_sys::mbedtls_cipher_reset(self.ctx) };
         check_ret(ret)
     }
 }
